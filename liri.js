@@ -1,7 +1,9 @@
 require("dotenv").config();
 var keys = require("./keys.js");
 var axios = require("axios");
+var moment = require("moment");
 var Spotify = require('node-spotify-api');
+var fs = require("fs");
 
 //OMDB - Movies//
 //Function to get the requested movie data from axios - OMDB
@@ -9,7 +11,7 @@ OMDBFunction = function(movieName){
     var queryOMDB = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
     axios.get(queryOMDB).then(
         function(OMDBResponse){
-            console.log("Movie Title: " + JSON.stringify(OMDBResponse.data[0].Title) + "\n Production Year: " + OMDBResponse.data[0].Year + "\n IMDB Rating: " + OMDBResponse.data[0].imdbRating + "\n Rotten Tomatoes Rating: " + OMDBResponse.data[0].Ratings + "\n Country: " + OMDBResponse.data[0].Country + "\n Language: " + OMDBResponse.data[0].Language + "\n Plot: " + OMDBResponse.data[0].Plot + "\n Actors: " + OMDBResponse.data[0].Actors);
+            console.log("Movie Title: " + JSON.stringify(OMDBResponse.data.Title) + "\n Production Year: " + OMDBResponse.data.Year + "\n IMDB Rating: " + OMDBResponse.data.imdbRating + "\n Rotten Tomatoes Rating: " + JSON.stringify(OMDBResponse.data.Ratings[1].Value) + "\n Country: " + OMDBResponse.data.Country + "\n Language: " + OMDBResponse.data.Language + "\n Plot: " + OMDBResponse.data.Plot + "\n Actors: " + OMDBResponse.data.Actors);
         }
     );
 };
@@ -20,9 +22,7 @@ var spotify = new Spotify(keys.spotify);
 spotifyFunction = function(songName){
     spotify.search({type: 'track', query: songName, limit: 2}).then(
         function(spotifyResponse){
-            console.log(spotifyResponse.tracks.items);
-            console.log("------")
-            console.log("Artist(s): " + spotifyResponse.tracks.items.artists.name + "\n Song Name: " + spotifyResponse.tracks.items.name + "\n Link: " + spotifyResponse.tracks.items.preview_url + "\n Album: " + spotifyResponse.tracks.items.album );
+            console.log("Artist(s): " + spotifyResponse.tracks.items[0].artists[0].name + "\n Song Name: " + spotifyResponse.tracks.items[0].name + "\n Link: " + JSON.stringify(spotifyResponse.tracks.items[0].external_urls.spotify) + "\n Album: " + spotifyResponse.tracks.items[0].album.name);
         }
     );
 };
@@ -33,10 +33,17 @@ BITFunction = function(artistName){
     var queryBIT = "https://rest.bandsintown.com/artists/" + artistName + "/events?app_id=codingbootcamp";
     axios.get(queryBIT).then(
         function(BITResponse){
-            console.log("Artist Name: " + JSON.stringify(BITResponse.data[0].lineup) + "\n Venue Name: " + BITResponse.data[0].venue.name + "\n Venue Location: " + BITResponse.data[0].venue.city + "\n Date: " + BITResponse.data[0].datetime)
-            //console.log(BITResponse);
+            console.log("Artist Name: " + JSON.stringify(BITResponse.data[0].lineup) + "\n Venue Name: " + BITResponse.data[0].venue.name + "\n Venue Location: " + BITResponse.data[0].venue.city + "\n Date: " + moment(BITResponse.data[0].datetime).format('MMMM Do YYYY'))
+            
         }
     );
+};
+
+fileFunction = function(fs){
+    fs.readFile("random.txt", "utf8", function(data){
+       var dataArr = data.split(",");
+       console.log(dataArr);
+    });
 };
 
 var userInput2 = "";
@@ -53,4 +60,6 @@ var userInput = process.argv;
         spotifyFunction(userInput2);
     } else if(userInput[2] == "concert-this"){
         BITFunction(userInput2);
+    } else if(userInput[2] == "do-what-it-says"){
+        fileFunction(userInput2);
     }
