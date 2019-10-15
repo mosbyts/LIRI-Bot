@@ -39,10 +39,17 @@ BITFunction = function(artistName){
     );
 };
 
-fileFunction = function(fs){
-    fs.readFile("random.txt", "utf8", function(data){
+var fileFunction = function(){
+    fs.readFile("random.txt", "utf8", function(err, data){
        var dataArr = data.split(",");
-       console.log(dataArr);
+       console.log(dataArr[0] + dataArr[1]);
+        if(dataArr[0] == "movie-this"){
+            OMDBFunction(dataArr[1]);
+        } else if(dataArr[0] == "spotify-this-song"){
+            spotifyFunction(dataArr[1]);
+        } else if(dataArr[0] == "concert-this"){
+            BITFunction(dataArr[1]);
+        }
     });
 };
 
